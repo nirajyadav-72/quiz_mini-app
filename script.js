@@ -9,37 +9,41 @@ let timeLeft = 15;
 const timeLimit = 15;
 let globalPlayerName = "Player"; 
 
-// Bind UI Interface Buttons
-document.getElementById('start-btn').addEventListener('click', startQuiz);
-document.getElementById('next-btn').addEventListener('click', nextQuestion);
-document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+export function initAppEngine() {
+    console.log("Bootstrapping Mini App Engine Core...");
+    
+    // 1. Fetch Dynamic User Session Data Layout parameters instantly
+    syncProfileData();
 
-// Theme Selection Overlay Panel Trigger Control maps
-const overlay = document.getElementById('theme-overlay');
-document.getElementById('theme-trigger-btn').addEventListener('click', () => overlay.classList.add('open'));
-document.getElementById('theme-close-btn').addEventListener('click', () => overlay.classList.remove('open'));
+    // 2. Set UI Event Listeners
+    document.getElementById('start-btn').onclick = startQuiz;
+    document.getElementById('next-btn').onclick = nextQuestion;
+    document.getElementById('restart-btn').onclick = restartQuiz;
 
-document.querySelectorAll('.theme-opt-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.theme-opt-btn').forEach(b => b.classList.remove('data-active'));
-        e.target.classList.add('data-active');
-        const newTheme = e.target.getAttribute('data-theme');
-        document.body.className = '';
-        document.body.classList.add(newTheme);
+    // Theme Selection Modal Controls
+    const overlay = document.getElementById('theme-overlay');
+    document.getElementById('theme-trigger-btn').onclick = () => overlay.classList.add('open');
+    document.getElementById('theme-close-btn').onclick = () => overlay.classList.remove('open');
+
+    document.querySelectorAll('.theme-opt-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            document.querySelectorAll('.theme-opt-btn').forEach(b => b.classList.remove('data-active'));
+            e.target.classList.add('data-active');
+            const newTheme = e.target.getAttribute('data-theme');
+            document.body.className = '';
+            document.body.classList.add(newTheme);
+        };
     });
-});
+}
 
-// ====================================================================
-// 👤 🔁 INFINITE RETRY TELEGRAM DATA FETCHING ENGINE (FIXED)
-// ====================================================================
-function tryFetchingTelegramUser() {
+function syncProfileData() {
     const tg = window.Telegram?.WebApp;
     
-    // Explicitly check if Telegram context and unsafe data block parameters are fully decrypted
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+    // Verify direct validation context parameter strings inside active iframe window container
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;
+        console.log("Telegram Auth Session Verification Match Found!", user);
         
-        // Formulate user identification name variables
         globalPlayerName = user.first_name || "Player";
         if (user.last_name) {
             globalPlayerName += ` ${user.last_name}`;
@@ -49,14 +53,13 @@ function tryFetchingTelegramUser() {
         const rawId = user.id;
         const rawLang = user.language_code ? user.language_code.toUpperCase() : "HI";
         
-        // 🚀 DOM Injection: Immediately push real profile context data to container blocks
+        // Render parameters into UI Containers safely on runtime
         document.getElementById('user-display-name').innerText = user.username ? `@${user.username}` : globalPlayerName;
         document.getElementById('meta-user-name').innerText = globalPlayerName;
         document.getElementById('meta-user-username').innerText = rawUsername;
         document.getElementById('meta-user-id').innerText = rawId;
         document.getElementById('meta-user-lang').innerText = rawLang;
         
-        // Secure Image Asset loading operations
         const avatarImg = document.getElementById('user-avatar');
         if (user.photo_url && user.photo_url.trim() !== "") {
             avatarImg.src = user.photo_url;
@@ -65,50 +68,24 @@ function tryFetchingTelegramUser() {
             avatarImg.src = `https://ui-avatars.com{letter}&background=4f46e5&color=fff&bold=true`;
         }
         
-        // Mark WebApp framework interface ready
-        tg.ready();
-        tg.expand();
         if (tg.colorScheme) {
             document.body.setAttribute('data-tg-theme', tg.colorScheme);
         }
-        
-        console.log("🎯 Successfully established secure handshake with Telegram. User ID matching:", rawId);
-        return true; // Stop loop signal parameter flag
-    }
-    return false; // Keep loop cycling flag
-}
-
-// 🔄 Set up the continuous background loop worker
-let telegramSyncTimer = setInterval(() => {
-    const isSyncedSuccessfully = tryFetchingTelegramUser();
-    
-    if (isSyncedSuccessfully) {
-        // Clear the background interval runtime loop permanently on success
-        clearInterval(telegramSyncTimer);
-    }
-}, 100);
-
-// 🛡️ Safe Failure Recovery: Fallback execution backup protocol triggers after 10 seconds only if outside Telegram app bounds
-setTimeout(() => {
-    const tgContext = window.Telegram?.WebApp;
-    // If we are verified to be sitting outside the active Telegram layout frames completely
-    if (!tgContext || !tgContext.initDataUnsafe || !tgContext.initDataUnsafe.user) {
-        clearInterval(telegramSyncTimer); // Kill the background worker thread pool loop 
-        console.log("Execution environment timeout reached. Loading local workspace mock sandbox profiles.");
-        
+    } else {
+        // Fallback executing only when project context is explicitly loaded outside Telegram shell bounds
+        console.log("Telegram security data wrappers inaccessible. Loading generic local mock metadata sandbox configurations.");
         globalPlayerName = "Anonymous User";
         document.getElementById('user-display-name').innerText = "Guest Player";
         document.getElementById('meta-user-name').innerText = "Guest Mode";
         document.getElementById('meta-user-username').innerText = "@Guest_Account";
-        document.getElementById('meta-user-id').innerText = Math.floor(1000000000 + Math.random() * 9000000000);
-        document.getElementById('meta-user-lang').innerText = "EN";
+        document.getElementById('meta-user-id').innerText = "--------";
+        document.getElementById('meta-user-lang').innerText = "HI";
         document.getElementById('user-avatar').src = "https://ui-avatars.com";
     }
-}, 10000);
-
+}
 
 // ====================================================================
-// 🎮 QUIZ GAME PLAYGROUND LOGIC CORE OPERATIONS
+// 🎮 QUIZ PLAYGROUND ENGINE MECHANICS
 // ====================================================================
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
@@ -226,4 +203,4 @@ function showResults() {
 
 function restartQuiz() {
     switchScreen('start-screen');
-        }
+            }
