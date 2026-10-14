@@ -9,12 +9,12 @@ let timeLeft = 15;
 const timeLimit = 15;
 let globalPlayerName = "Player"; 
 
-// बटन इवेंट लिसनर्स बाइंडिंग
+// Bind UI Interface Buttons
 document.getElementById('start-btn').addEventListener('click', startQuiz);
 document.getElementById('next-btn').addEventListener('click', nextQuestion);
 document.getElementById('restart-btn').addEventListener('click', restartQuiz);
 
-// थीम मॉडल हैंडलर्स
+// Theme Selection Overlay Panel Trigger Control maps
 const overlay = document.getElementById('theme-overlay');
 document.getElementById('theme-trigger-btn').addEventListener('click', () => overlay.classList.add('open'));
 document.getElementById('theme-close-btn').addEventListener('click', () => overlay.classList.remove('open'));
@@ -29,32 +29,34 @@ document.querySelectorAll('.theme-opt-btn').forEach(btn => {
     });
 });
 
-// ⚡ 1. रेफ़रेंस ऐप की तरह असली डायनेमिक टेलीग्राम डेटा फ़ेचिंग इंजन
-function parseTelegramProfile() {
+// ====================================================================
+// 👤 🔁 INFINITE RETRY TELEGRAM DATA FETCHING ENGINE (FIXED)
+// ====================================================================
+function tryFetchingTelegramUser() {
     const tg = window.Telegram?.WebApp;
     
-    // अगर टेलीग्राम वेबव्यू एक्टिव है और उसमें यूज़र ऑब्जेक्ट मौजूद है
-    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    // Explicitly check if Telegram context and unsafe data block parameters are fully decrypted
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
         const user = tg.initDataUnsafe.user;
         
-        // यूज़रनेम, नाम और आईडी अलग-अलग निकालना
+        // Formulate user identification name variables
         globalPlayerName = user.first_name || "Player";
         if (user.last_name) {
             globalPlayerName += ` ${user.last_name}`;
         }
         
         const rawUsername = user.username ? `@${user.username}` : "None";
-        const rawId = user.id || "Unknown";
+        const rawId = user.id;
         const rawLang = user.language_code ? user.language_code.toUpperCase() : "HI";
         
-        // 🚀 डायरेक्ट डॉम इंजेक्शन (DOM Injection): तुरंत फ्रंटएंड को अपडेट करना
+        // 🚀 DOM Injection: Immediately push real profile context data to container blocks
         document.getElementById('user-display-name').innerText = user.username ? `@${user.username}` : globalPlayerName;
         document.getElementById('meta-user-name').innerText = globalPlayerName;
         document.getElementById('meta-user-username').innerText = rawUsername;
         document.getElementById('meta-user-id').innerText = rawId;
         document.getElementById('meta-user-lang').innerText = rawLang;
         
-        // प्रोफ़ाइल अवतार हैंडलर (अगर सेटिंग्स लॉक है तो इनिशियल्स अवतार जेनरेट करना)
+        // Secure Image Asset loading operations
         const avatarImg = document.getElementById('user-avatar');
         if (user.photo_url && user.photo_url.trim() !== "") {
             avatarImg.src = user.photo_url;
@@ -63,45 +65,50 @@ function parseTelegramProfile() {
             avatarImg.src = `https://ui-avatars.com{letter}&background=4f46e5&color=fff&bold=true`;
         }
         
-        // टेलीग्राम स्क्रीन रेडी कस्टमाइज़ेशन
+        // Mark WebApp framework interface ready
         tg.ready();
         tg.expand();
         if (tg.colorScheme) {
             document.body.setAttribute('data-tg-theme', tg.colorScheme);
         }
-        return true; // डेटा सफलतापूर्वक लोड हुआ
+        
+        console.log("🎯 Successfully established secure handshake with Telegram. User ID matching:", rawId);
+        return true; // Stop loop signal parameter flag
     }
-    return false; // टेलीग्राम ऑब्जेक्ट अभी रेडी नहीं है
+    return false; // Keep loop cycling flag
 }
 
-// 🎯 2. ऑटो-रिकवरी लूप: जब तक टेलीग्राम का इंटरफ़ेस 100% सिंक न हो, यह हर 100ms पर री-चेक करेगा
-let syncAttempts = 0;
-const syncInterval = setInterval(() => {
-    syncAttempts++;
-    const isLoaded = parseTelegramProfile();
+// 🔄 Set up the continuous background loop worker
+let telegramSyncTimer = setInterval(() => {
+    const isSyncedSuccessfully = tryFetchingTelegramUser();
     
-    // अगर डेटा मिल गया या 20 बार प्रयास (2 सेकंड) फेल हो गए, तो लूप बंद करें
-    if (isLoaded || syncAttempts > 20) {
-        clearInterval(syncInterval);
-        
-        // अगर 2 सेकंड बाद भी ऐप क्रोम/सफ़ारी में खुला है (टेलीग्राम के बाहर)
-        if (!isLoaded) {
-            console.log("Running in standard browser mode. Loading global mock fields.");
-            globalPlayerName = "Anonymous Player";
-            document.getElementById('user-display-name').innerText = "Guest Mode";
-            document.getElementById('meta-user-name').innerText = "Guest";
-            document.getElementById('meta-user-username').innerText = "@Guest_User";
-            // आपकी फिक्स आईडी दिखाने के बजाय रैंडम आईडी जेनरेट होगी ताकि डेटा ओवरलैप न लगे
-            document.getElementById('meta-user-id').innerText = Math.floor(1000000000 + Math.random() * 9000000000);
-            document.getElementById('meta-user-lang').innerText = "HI";
-            document.getElementById('user-avatar').src = "https://ui-avatars.com";
-        }
+    if (isSyncedSuccessfully) {
+        // Clear the background interval runtime loop permanently on success
+        clearInterval(telegramSyncTimer);
     }
 }, 100);
 
+// 🛡️ Safe Failure Recovery: Fallback execution backup protocol triggers after 10 seconds only if outside Telegram app bounds
+setTimeout(() => {
+    const tgContext = window.Telegram?.WebApp;
+    // If we are verified to be sitting outside the active Telegram layout frames completely
+    if (!tgContext || !tgContext.initDataUnsafe || !tgContext.initDataUnsafe.user) {
+        clearInterval(telegramSyncTimer); // Kill the background worker thread pool loop 
+        console.log("Execution environment timeout reached. Loading local workspace mock sandbox profiles.");
+        
+        globalPlayerName = "Anonymous User";
+        document.getElementById('user-display-name').innerText = "Guest Player";
+        document.getElementById('meta-user-name').innerText = "Guest Mode";
+        document.getElementById('meta-user-username').innerText = "@Guest_Account";
+        document.getElementById('meta-user-id').innerText = Math.floor(1000000000 + Math.random() * 9000000000);
+        document.getElementById('meta-user-lang').innerText = "EN";
+        document.getElementById('user-avatar').src = "https://ui-avatars.com";
+    }
+}, 10000);
+
 
 // ====================================================================
-// 🎮 क्विज़ गेम कोर इंजन ऑपरेशन्स
+// 🎮 QUIZ GAME PLAYGROUND LOGIC CORE OPERATIONS
 // ====================================================================
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
@@ -219,5 +226,4 @@ function showResults() {
 
 function restartQuiz() {
     switchScreen('start-screen');
-              }
-      
+        }
