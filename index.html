@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Quiz Game Mini App</title>
-    <!-- CSS फ़ाइल लिंक -->
+    <!-- CSS File Link -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
 
     <div class="quiz-container">
         
-        <!-- टॉप बार (यूज़र पिल और थीम ट्रिगर) -->
+        <!-- TOP CONTROL MENU -->
         <div class="top-bar">
-            <div class="user-pill">
-                <img src="https://ui-avatars.com" id="user-avatar" alt="User DP">
+            <div class="user-pill" id="user-pill">
+                <img src="https://ui-avatars.com" id="user-avatar" alt="DP">
                 <span id="user-display-name">Loading...</span>
             </div>
             <button class="settings-btn" id="theme-trigger-btn">🎨</button>
         </div>
 
-        <!-- थीम चयन मॉडल पैनल -->
+        <!-- THEME INTERACTIVE OVERLAY POPUP -->
         <div class="theme-overlay" id="theme-overlay">
             <div class="theme-modal">
                 <h3>Choose Your Theme 🎨</h3>
@@ -41,7 +41,6 @@
             <p class="subtitle">अपनी तैयारी को परखें और स्कोर सुधारें!</p>
             <div class="emoji-banner">🏆</div>
             
-            <!-- 🗺️ लाइव यूज़र प्रोफ़ाइल कार्ड कंटेनर -->
             <div class="profile-card">
                 <h4>💞 Your Profile 💞</h4>
                 <p>👤 नाम: <span id="meta-user-name" style="font-weight: bold; color: #a5b4fc;">Loading...</span></p>
@@ -67,7 +66,7 @@
             <div id="question-text" class="question-text">प्रश्न यहाँ लोड होगा...</div>
             
             <ul id="options-list" class="options-list">
-                <!-- ऑप्शंस जावास्क्रिप्ट से डायनेमिकली लोड होंगे -->
+                <!-- JavaScript handles option injection here -->
             </ul>
 
             <div id="explanation-box" class="explanation-box"></div>
@@ -98,10 +97,28 @@
 
     </div>
 
-    <!-- 🌐 टेलीग्राम आधिकारिक जावास्क्रिप्ट वेबऐप एसडीके -->
+    <!-- 🌐 Official Telegram SDK Loaded First synchronously -->
     <script src="https://telegram.org"></script>
-    <!-- कोर स्क्रिप्ट लिंक -->
-    <script type="module" src="script.js"></script>
+    
+    <!-- ⚡ Dynamic initialization engine to bind module tracking safety -->
+    <script type="module">
+        import { initAppEngine } from './script.js';
+        
+        function bootstrap() {
+            // Force WebApp execution context updates directly before loading script modules
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+            initAppEngine();
+        }
+
+        // Wait until window components are verified stable on screen
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootstrap);
+        } else {
+            bootstrap();
+        }
+    </script>
 </body>
-  </html>
-  
+</html>
